@@ -1,16 +1,13 @@
 #include "Marquardt.h"
 
-Marquardt::Marquardt(vector<double> x, double lambda, double eps, int M)
+Marquardt::Marquardt(size_t dim, double(*f)(vector<double>), vector<double> x, double lambda, double eps, double M)
 {
+	this->dim = dim;
+	this->f = f;
 	this->x = x;
 	this->lambda = lambda;
 	this->eps = eps;
 	this->M = M;
-}
-
-double Marquardt::Function(vector<double> q)
-{
-	return (q[0] + 6. * q[1]) * (q[0] + 6. * q[1]) + (q[0] + 2.) * (q[0] + 2.);
 }
 
 void Marquardt::Gradient()
@@ -22,7 +19,7 @@ void Marquardt::Gradient()
 		vector<double> x_i_next = x, x_i_prev = x;
 		x_i_next[i] += h;
 		x_i_prev[i] -= h;
-		grad[i] = (Function(x_i_next) - Function(x_i_prev)) / (2 * h);
+		grad[i] = (f(x_i_next) - f(x_i_prev)) / (2 * h);
 	}
 }
 
@@ -36,18 +33,18 @@ void Marquardt::Hessian()
 
 	x_1[0] += h;
 	x_2[0] -= h;
-	H[0][0] = (Function(x_1) - 2 * Function(x) + Function(x_2)) / (h * h);
+	H[0][0] = (f(x_1) - 2 * f(x) + f(x_2)) / (h * h);
 
 	x_3[1] += h;
 	x_4[1] -= h;
-	H[1][1] = (Function(x_3) - 2 * Function(x) + Function(x_4)) / (h * h);
+	H[1][1] = (f(x_3) - 2 * f(x) + f(x_4)) / (h * h);
 
 	x_1 = x;  x_1[0] += h; x_1[1] += h;
 	x_2 = x;  x_2[0] += h; x_2[1] -= h;
 	x_3 = x;  x_3[0] -= h; x_3[1] += h;
 	x_4 = x;  x_4[0] -= h; x_4[1] -= h;
 
-	H[0][1] = (Function(x_1) - Function(x_2) - Function(x_3) + Function(x_4)) / (4 * h * h);
+	H[0][1] = (f(x_1) - f(x_2) - f(x_3) + f(x_4)) / (4 * h * h);
 	H[1][0] = H[0][1];
 }
 
@@ -112,7 +109,7 @@ vector<double> Marquardt::Calculate()
 				x_next[i] = x[i] + d[i];
 			}
 
-			if (Function(x_next) - Function(x) < 0)
+			if (f(x_next) - f(x) < 0)
 			{
 				x = x_next;
 				lambda /= 2.;

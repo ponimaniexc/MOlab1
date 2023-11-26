@@ -5,18 +5,17 @@
 
 using namespace std;
 
-const int n = 2;
-
 class GradientDescent
 {
 private:
+	double(*f)(vector<double>);
 	vector<double> x, grad;
-	double t, eps, h = 1e-5;
-	int k = 0, M;
+	double t, eps, h = 1e-5, M;
+	int k = 0;
+	size_t dim;
 
 public:
-	GradientDescent(vector<double>, double, double, int);
-	double Function(vector<double>);
+	GradientDescent(size_t, double(*)(vector<double>), vector<double>, double, double, double);
 	void Gradient();
 	bool StopCriteria(vector<double>);
 	vector<double> Calculate();
